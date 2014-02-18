@@ -13,41 +13,23 @@ class MinHeap(object):
 
     @staticmethod
     def parent(index):
-        """
-        Return heap-index for the parent of node at index
-
-        :index: index of child node
-        :returns: index of parent node
-
-        """
+        """ Return heap-index for the parent of node at index. """
         return index // 2
 
     @staticmethod
     def left_child(index):
-        """
-        Return heap-index for the left-child of node at index
-
-        :index: index of parent node
-        :returns: index of left-child
-
-        """
+        """ Return heap-index for the left-child of node at index. """
         return index << 1
 
     @staticmethod
     def right_child(index):
-        """
-        Return the heap-index for the right-child of node at index
-
-        :index: index of parent node
-        :returns: index of right-child
-
-        """
+        """ Return the heap-index for the right-child of node at index. """
         return (index << 1) + 1
 
     def min_heapify(self, i):
         """
-        Build a min-heap out of node i and the two min-heaps rooted at
-        Left(i) and Right(i)
+        Build a min-heap rooted at node i using the two min-heaps rooted at
+        Left(i) and Right(i).
 
         :i: index of root node
 
@@ -65,12 +47,8 @@ class MinHeap(object):
             self.min_heapify(min_i)
 
     def build_min_heap(self, arr):
-        """
-        Build min-heap from input array
+        """ Build min-heap from input array. """
 
-        :arr: array to be heapified
-
-        """
         size = len(arr)
         self.heap = [None] + arr
         self.heap_size = size
@@ -78,7 +56,9 @@ class MinHeap(object):
 
     def rebuild_heap(self):
         """
-        Rebuild min-heap from self.heap.  Used when heap values have mutated
+        Rebuild min-heap from self.heap.
+
+        Used when heap values have mutated
         and heap invariant must be restored throughout heap.
 
         """
@@ -99,12 +79,7 @@ class MinHeap(object):
             return self.heap[1]
 
     def extract_min(self):
-        """
-        Remove and return the node at the top of the heap.
-
-        :returns: Node with minimum size
-
-        """
+        """ Remove and return the node at the top of the heap. """
         if self.heap_size < 1:
             return None
         min_node = self.heap[1]
@@ -114,12 +89,7 @@ class MinHeap(object):
         return min_node
 
     def get_heap(self):
-        """
-        Return array representation of heap.
-
-        :returns: array representation of heap
-
-        """
+        """ Return array representation of heap. """
         return self.heap[1:]
 
 
@@ -142,74 +112,35 @@ class GridEntry(object):
         self.candidates = set([])
 
     def get_x(self):
-        """
-        Return x-coordinate
-
-        :returns: x-coordinate
-
-        """
+        """ Return x-coordinate """
         return self.x
 
     def get_y(self):
-        """
-        Return y-coordinate
-
-        :returns: y-coordinate
-
-        """
+        """ Return y-coordinate """
         return self.y
 
     def get_value(self):
-        """
-        Return value of cell
-
-        :returns: value
-
-        """
+        """ Return value of cell """
         return self.value
 
     def get_candidates(self):
-        """
-        Return set of candidates
-
-        :returns: set of candidates
-
-        """
+        """ Return set of candidates """
         return self.candidates
 
     def set_value(self, val):
-        """
-        Set cell value
-
-        :val: value to be set
-
-        """
+        """ Set cell value """
         self.value = val
 
     def set_candidates(self, cands):
-        """
-        Set candidates set
-
-        :cands: candidates set
-
-        """
+        """ Set candidates """
         self.candidates = cands
 
     def size(self):
-        """
-        Return length of candidate set for this cell
-
-        :returns: length of candidate set
-
-        """
+        """ Return length of candidate set for this cell """
         return len(self.candidates)
 
     def has_value(self):
-        """
-        Check if cell has a value assigned
-        :returns: true if cell's value has been set
-
-        """
+        """ Return true if cell has a value assigned """
         return self.value != "_"
 
     def __lt__(self, entry):
@@ -239,9 +170,10 @@ class GridEntry(object):
 
 def make_grid(filename):
     """
-    Build a 2D square array from txt file.  File should be a comma-separated
-    list of values representing a sudoku grid.  Blank cells should be
-    represented by a "_"
+    Build a 2D square array from txt file.
+
+    File should be a comma-separated list of values representing a sudoku
+    grid.  Blank cells should be represented by a "_"
 
     i.e.
 
@@ -319,9 +251,10 @@ def make_value_set(entries):
     return val_set
 
 
-def filter_initial_values(flatgrid):
+def get_unsolved_cells(flatgrid):
     """
     Remove GridEntry objects that already have a value set.
+
     The list returned from this method will be used to
     populate the min-heap with all unknown cells whose
     values still need to be determined.
@@ -337,7 +270,6 @@ def filter_initial_values(flatgrid):
 def update_candidates(grid, entries):
     """
     Recalculates possible candidates for each GridEntry object in entries.
-    Used after grid values have been updated.
 
     :grid: 2D sudoku grid
     :entries: 1D array of flattened 2D sudoku grid
@@ -353,23 +285,10 @@ def update_candidates(grid, entries):
         entry.set_candidates(candidates)
 
 
-def initialize_candidates(grid):
-    """
-    Populate GridEntry objects with unknown values with a set of all
-    possible candidate values.
-
-    :grid: 2D sudoku grid
-    :returns: 1D list of unknown GridEntry objects with candidates updated
-
-    """
-    flat_grid = list(itertools.chain.from_iterable(grid))
-    filtered = filter_initial_values(flat_grid)
-    update_candidates(grid, filtered)
-    return filtered
-
-
 def propagate_all_singletons(grid, heap):
     """
+    Sets the value of all cells with only one candidate.
+
     Recursively checks the top element of the heap.  If it is a singleton,
     meaning it has only one candidate value, then that value must be the value
     of the cell.  That value is set and the entry is removed from the heap
@@ -390,21 +309,44 @@ def propagate_all_singletons(grid, heap):
     heap.rebuild_heap()
 
 
+def init_sudoku(filename):
+    """
+    Generates sudoku grid from input file and initializes candidate values.
+
+    Builds the 2D grid and populates the set of candidates for each unsolved
+    cell with its initial value.
+
+    :filename: input file containing sudoku puzzle
+    :returns: 2D sudoku grid and list of unsolved cells
+
+    """
+    sudoku = make_grid(filename)
+    flat_grid = list(itertools.chain.from_iterable(sudoku))
+    unsolved_cells = get_unsolved_cells(flat_grid)
+    update_candidates(sudoku, unsolved_cells)
+
+    return (sudoku, empty_cells)
+
+
 def solve_sudoku(filename):
     """
+    Solve sudoku puzzle sourced from input file.
+
     Builds the 2D grid representation of sudoku puzzle and solves it via a
-    combination of singleton propagation and depth-first search.
+    combination of singleton propagation (using a priority queue) and
+    depth-first search if necessary.
 
     :filename: file containing sudoku grid
 
     """
-    sudoku_grid = make_grid(filename)
-    filtered_grid = initialize_candidates(sudoku_grid)
+    sudoku, unsolved_cells = init_sudoku(filename)
     heap = MinHeap()
-    heap.build_min_heap(filtered_grid)
+    heap.build_min_heap(unsolved_cells)
 
     while heap.get_min() and heap.get_min().size() == 1:
-        propagate_all_singletons(sudoku_grid, heap)
+        propagate_all_singletons(sudoku, heap)
+
+    print_sudoku(sudoku)
 
 
 def print_sudoku(grid):
