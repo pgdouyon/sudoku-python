@@ -253,11 +253,7 @@ def make_value_set(entries):
 
 def get_unsolved_cells(flatgrid):
     """
-    Remove GridEntry objects that already have a value set.
-
-    The list returned from this method will be used to
-    populate the min-heap with all unknown cells whose
-    values still need to be determined.
+    Extract cells without an initial value from the 1D input array
 
     :flatgrid: 1D array of a flattend 2D sudoku grid
     :returns: list of GridEntry objects with unknown/unset values
