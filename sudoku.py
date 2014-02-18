@@ -325,7 +325,7 @@ def init_sudoku(filename):
     unsolved_cells = get_unsolved_cells(flat_grid)
     update_candidates(sudoku, unsolved_cells)
 
-    return (sudoku, empty_cells)
+    return (sudoku, unsolved_cells)
 
 
 def solve_sudoku(filename):
