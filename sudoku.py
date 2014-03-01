@@ -304,11 +304,15 @@ def propagate_singletons(grid, heap):
 
 
 def propagate_singletons_recursive(grid, heap):
-    """@todo: Docstring for propagate_singletons_recursive.
+    """
+    Reduces grid by recursively propagating singletons and rebuilding the heap
 
-    :grid: @todo
-    :head: @todo
-    :returns: @todo
+    Uses propagate singleton to reduce all singletons currently on the heap,
+    then updates the candidate sets for all cells on the heap and loops if
+    there are new singletons to reduce.
+
+    :grid: 2D sudoku grid
+    :heap: heap containing unsolved cells
 
     """
     while heap.get_min() and heap.get_min().size() == 1:
