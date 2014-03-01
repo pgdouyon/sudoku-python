@@ -281,7 +281,7 @@ def update_candidates(grid, entries):
         entry.set_candidates(candidates)
 
 
-def propagate_all_singletons(grid, heap):
+def propagate_singletons(grid, heap):
     """
     Sets the value of all cells with only one candidate.
 
@@ -301,8 +301,20 @@ def propagate_all_singletons(grid, heap):
         singleton = heap.extract_min()
         val = singleton.get_candidates().pop()
         singleton.set_value(val)
-    update_candidates(grid, heap.get_heap())
-    heap.rebuild_heap()
+
+
+def propagate_singletons_recursive(grid, heap):
+    """@todo: Docstring for propagate_singletons_recursive.
+
+    :grid: @todo
+    :head: @todo
+    :returns: @todo
+
+    """
+    while heap.get_min() and heap.get_min().size() == 1:
+        propagate_singletons(grid, heap)
+        update_candidates(grid, heap.get_heap())
+        heap.rebuild_heap()
 
 
 def init_sudoku(filename):
@@ -339,8 +351,7 @@ def solve_sudoku(filename):
     heap = MinHeap()
     heap.build_min_heap(unsolved_cells)
 
-    while heap.get_min() and heap.get_min().size() == 1:
-        propagate_all_singletons(sudoku, heap)
+    propagate_singletons_recursive(sudoku, heap)
 
     print_sudoku(sudoku)
 
