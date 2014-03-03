@@ -247,8 +247,13 @@ def get_box(grid, entry):
 
 
 def transpose(grid):
-    """ Return a transpose of the grid """
-    return [list(l) for l in zip(*grid)]
+    """
+    Return a transpose of the grid
+    :grid: 2D array representing sudoku grid
+
+    """
+    xpose = [list(l) for l in zip(*grid)]
+    return xpose
 
 
 def make_value_set(entries):
@@ -441,12 +446,7 @@ def print_sudoku(grid):
 
 
 def check_rows(grid):
-    """@todo: Docstring for check_rows.
-
-    :grid: @todo
-    :returns: @todo
-
-    """
+    """ Checks all rows to see if the have the numbers 1-9 """
     for row in grid:
         val_set = make_value_set(row)
         expected = set(map(str, range(1, len(row) + 1)))
@@ -456,12 +456,7 @@ def check_rows(grid):
 
 
 def check_cols(grid):
-    """@todo: Docstring for check_cols.
-
-    :grid: @todo
-    :returns: @todo
-
-    """
+    """ Checks all cols to see if the have the numbers 1-9 """
     xpose = transpose(grid)
     for col in xpose:
         val_set = make_value_set(col)
@@ -472,12 +467,7 @@ def check_cols(grid):
 
 
 def check_boxs(grid):
-    """@todo: Docstring for check_boxs.
-
-    :grid: @todo
-    :returns: @todo
-
-    """
+    """ Checks all boxes to see if the have the numbers 1-9 """
     for box_num in range(len(grid)):
         rows = 3 * (box_num // 3)
         cols = 3 * (box_num % 3)
@@ -492,13 +482,7 @@ def check_boxs(grid):
 
 
 def validate_sudoku(grid):
-    """@todo: Docstring for validate_sudoku.
-
-    :grid: @todo
-    :returns: @todo
-
-    """
-    pass
+    """ Validates that all rows, cols, and boxes contain only numbers 1-9 """
     rows = check_rows(grid)
     cols = check_cols(grid)
     boxs = check_boxs(grid)
