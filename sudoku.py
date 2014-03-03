@@ -143,6 +143,12 @@ class GridEntry(object):
         """ Return true if cell has a value assigned """
         return self.value != "_"
 
+    def clone(self):
+        """ Return copy of this GridEntry object """
+        clone = GridEntry(self.x, self.y, self.value)
+        clone.set_candidates(self.candidates.copy())
+        return clone
+
     def __lt__(self, entry):
         """
         Override __lt__ method.  Compare cells by length of candidate sets.
@@ -321,6 +327,58 @@ def propagate_singletons_recursive(grid, heap):
         heap.rebuild_heap()
 
 
+def clone_grid(grid):
+    """ Copy each entry to a new 2D array """
+    grid_copy = []
+    for row in grid:
+        row_copy = [e.clone() for e in row]
+        grid_copy.append(row_copy)
+    return grid_copy
+
+
+def clone_state(grid):
+    """ Return cloned grid and a new heap of its unsolved cells """
+    grid_copy = clone_grid(grid)
+    flatgrid = list(itertools.chain.from_iterable(grid_copy))
+    unsolved_cells = get_unsolved_cells(flatgrid)
+    heap_copy = MinHeap()
+    heap_copy.build_min_heap(unsolved_cells)
+    return (grid_copy, heap_copy)
+
+
+def dfs(grid, heap):
+    """
+    Solve grid by checking each candidate for the entry at the top of the heap
+
+    Clones the grid/heap and chooses a candidate at random from the GridEntry
+    atop the heap.  Sets the value of that cell to that candidate value and
+    recursively solves the new grid/heap formed from that choice.  Continues
+    choosing in this way until a solution is found.  The original heap/grid is
+    cloned to avoid corrupting its values if the original choice was incorrect.
+
+    :returns: puzzle solution or false if none exists for the given input state
+
+    """
+    while heap.get_min() and heap.get_min().size() != 0:
+        val = heap.get_min().get_candidates().pop()
+        grid_copy, heap_copy = clone_state(grid)
+
+        singleton = heap_copy.extract_min()
+        singleton.set_value(val)
+        update_candidates(grid_copy, heap_copy.get_heap())
+        heap_copy.rebuild_heap()
+        propagate_singletons_recursive(grid_copy, heap_copy)
+
+        if not heap_copy.get_min():
+            return grid_copy
+        elif heap_copy.get_min().size() > 1:
+            solution = dfs(grid_copy, heap_copy)
+            if solution:
+                return solution
+
+    return False
+
+
 def init_sudoku(filename):
     """
     Generates sudoku grid from input file and initializes candidate values.
@@ -356,6 +414,8 @@ def solve_sudoku(filename):
     heap.build_min_heap(unsolved_cells)
 
     propagate_singletons_recursive(sudoku, heap)
+    if heap.get_min():
+        sudoku = dfs(sudoku, heap)
 
     print_sudoku(sudoku)
 
