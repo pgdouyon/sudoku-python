@@ -222,7 +222,8 @@ def get_col(grid, entry):
 
     """
     y = entry.get_y()
-    col = [grid[i][y] for i in range(len(grid))]
+    xpose = transpose(grid)
+    col = xpose[y]
     return col
 
 
@@ -243,6 +244,11 @@ def get_box(grid, entry):
     ys = range(box_y, box_y + 3)
     box = [grid[i][j] for i in xs for j in ys]
     return box
+
+
+def transpose(grid):
+    """ Return a transpose of the grid """
+    return [list(l) for l in zip(*grid)]
 
 
 def make_value_set(entries):
@@ -350,11 +356,11 @@ def dfs(grid, heap):
     """
     Solve grid by checking each candidate for the entry at the top of the heap
 
-    Clones the grid/heap and chooses a candidate at random from the GridEntry
-    atop the heap.  Sets the value of that cell to that candidate value and
-    recursively solves the new grid/heap formed from that choice.  Continues
-    choosing in this way until a solution is found.  The original heap/grid is
-    cloned to avoid corrupting its values if the original choice was incorrect.
+    Clones the grid/heap and randomly chooses a candidate for the GridEntry
+    atop the heap.  Recursively checks if that choice is a part of the correct
+    solution and if not then the recursion backs up and chooses a different
+    candidate.  The original heap/grid is cloned to avoid corrupting its values
+    if the original choice was incorrect.
 
     :returns: puzzle solution or false if none exists for the given input state
 
@@ -370,7 +376,8 @@ def dfs(grid, heap):
         propagate_singletons_recursive(grid_copy, heap_copy)
 
         if not heap_copy.get_min():
-            return grid_copy
+            if validate_sudoku(grid_copy):
+                return grid_copy
         elif heap_copy.get_min().size() > 1:
             solution = dfs(grid_copy, heap_copy)
             if solution:
@@ -419,6 +426,11 @@ def solve_sudoku(filename):
 
     print_sudoku(sudoku)
 
+    if validate_sudoku(sudoku):
+        print("Solution validated!")
+    else:
+        print("FAILED - Invalid solution")
+
 
 def print_sudoku(grid):
     for row in grid:
@@ -426,6 +438,72 @@ def print_sudoku(grid):
         for entry in row:
             s = s + entry.get_value() + ","
         print(s)
+
+
+def check_rows(grid):
+    """@todo: Docstring for check_rows.
+
+    :grid: @todo
+    :returns: @todo
+
+    """
+    for row in grid:
+        val_set = make_value_set(row)
+        expected = set(map(str, range(1, len(row) + 1)))
+        if val_set != expected:
+            return False
+    return True
+
+
+def check_cols(grid):
+    """@todo: Docstring for check_cols.
+
+    :grid: @todo
+    :returns: @todo
+
+    """
+    xpose = transpose(grid)
+    for col in xpose:
+        val_set = make_value_set(col)
+        expected = set(map(str, range(1, len(col) + 1)))
+        if val_set != expected:
+            return False
+    return True
+
+
+def check_boxs(grid):
+    """@todo: Docstring for check_boxs.
+
+    :grid: @todo
+    :returns: @todo
+
+    """
+    for box_num in range(len(grid)):
+        rows = 3 * (box_num // 3)
+        cols = 3 * (box_num % 3)
+        xs = range(rows, rows + 3)
+        ys = range(cols, cols + 3)
+        box = [grid[x][y] for x in xs for y in ys]
+        val_set = make_value_set(box)
+        expected = set(map(str, range(1, len(box) + 1)))
+        if val_set != expected:
+            return False
+    return True
+
+
+def validate_sudoku(grid):
+    """@todo: Docstring for validate_sudoku.
+
+    :grid: @todo
+    :returns: @todo
+
+    """
+    pass
+    rows = check_rows(grid)
+    cols = check_cols(grid)
+    boxs = check_boxs(grid)
+    return rows and cols and boxs
+
 
 if __name__ == "__main__":
     print("Main")
